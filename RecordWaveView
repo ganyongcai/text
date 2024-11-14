@@ -181,7 +181,31 @@ public class RecordWaveView extends View {
         }
     }
 
+    // 定义动画属性
+    private ValueAnimator animator;
+    private float translationX = 0f; // 平移量
 
+    // 初始化动画
+    public void startAnimation() {
+        if (animator != null && animator.isRunning()) {
+            animator.cancel();
+        }
+
+        animator = ValueAnimator.ofFloat(0, -getWidth()); // 从0到-viewWidth平移
+        animator.setDuration(5000); // 动画持续时间，单位为毫秒
+        animator.setRepeatCount(ValueAnimator.INFINITE); // 循环播放
+        animator.setInterpolator(new LinearInterpolator()); // 线性插值器，匀速运动
+
+        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                translationX = (float) animation.getAnimatedValue();
+                invalidate(); // 重绘视图
+            }
+        });
+
+        animator.start();
+    }
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -204,6 +228,8 @@ public class RecordWaveView extends View {
         int end = 0;
 
         if (mIsRecordPlay) {
+            // 应用平移
+            canvas.translate(translationX, 0);
             mVisibleLines = (int) (getWidth() / mWavesInterval);
             start = mPosition > mVisibleLines / 2 ? (mPosition - mVisibleLines / 2)
                     : 0;
